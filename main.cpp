@@ -7,34 +7,49 @@ int main()
 {	//-------------INITIALIZE-----------------------------
 	ContextSettings settings;
 	settings.antiAliasingLevel = 8;
-	RenderWindow window(VideoMode({1980,1050}), "RPG Game", Style::Default, State::Fullscreen, settings);
-
-	
-
-
-
+	RenderWindow window(VideoMode({1980,1050}), "RPG Game", Style::Default, State::Windowed, settings);
 
 	//-------------INITIALIZE-----------------------------
 
-	//-------------LOAD-----------------------------
+	//-------------SKELETON-----------------------------
+	
+	Texture skeletonTexture;
+	Sprite skeletonSprite(skeletonTexture);
+
+	if (skeletonTexture.loadFromFile("Project1/assets/enemy/textures/spriteSheet.png"))
+	{
+		int XIndex = 0;
+		int YIndex = 2;
+
+		skeletonSprite.setTexture(skeletonTexture);
+		skeletonSprite.setTextureRect(IntRect({ XIndex * 64, YIndex * 64 }, { 64,64 }));
+		skeletonSprite.scale({ 2,2 });
+		skeletonSprite.setPosition({ 400,100 });
+
+	}
+
+	//-------------SKELETON-----------------------------
+	
+	
+	//-------------PLAYER-----------------------------
 	Texture playerTexture;
 	Sprite playerSprite(playerTexture);
 	
 
-	if (playerTexture.loadFromFile("Project1/assets/player/textures/spriteSheet.png"))
+	if (playerTexture.loadFromFile("Project1/assets/player/textures/characters.png"))
 	{	
 		int XIndex = 0;
 		int YIndex = 0;
 
 		playerSprite.setTexture(playerTexture);
-		playerSprite.setTextureRect(IntRect({XIndex*64, YIndex*64}, {64,64}));
-		playerSprite.scale({ 2,2 });
+		playerSprite.setTextureRect(IntRect({XIndex*32, YIndex*32}, {32,32}));
+		playerSprite.scale({ 4,4 });
 	}
 	else {
 		cout << "Image failed to load" << endl;
 	}
 
-
+	//-------------PLAYER-----------------------------
 
 	
 
@@ -85,6 +100,7 @@ int main()
 
 		//----------DRAW----------------------------------
 		window.clear(Color::Black);
+		window.draw(skeletonSprite);
 		window.draw(playerSprite);
 		window.display();
 		//----------DRAW----------------------------------
