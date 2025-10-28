@@ -6,6 +6,9 @@ class Skeleton
 {
 private:
 	Texture texture;
+	Vector2i size;
+
+	RectangleShape boundingRectangle;
 
 public:
 	Sprite sprite;

@@ -12,6 +12,9 @@ private:
 	Texture texture;
 	vector<RectangleShape>bullets;
 	float bulletSpeed = 4;
+	Vector2i size;
+
+	RectangleShape boundingRectangle;
 
 public:
 	Sprite sprite;
