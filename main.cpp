@@ -4,6 +4,7 @@
 
 #include "Player.h"
 #include "Skeleton.h"
+#include "FrameRate.h"
 using namespace std;
 using namespace sf;
 
@@ -11,18 +12,27 @@ using namespace sf;
 
 int main()
 {	
-	RenderWindow window(VideoMode({1980,1050}), "RPG Game", Style::Default);
+	RenderWindow window(VideoMode({ 1980,1050 }), "RPG Game", Style::Default);
+	window.setFramerateLimit(144);
+	window.setVerticalSyncEnabled(true);
+
+
 
 	Skeleton skeleton;
 	Player player;
+	FrameRate framerate;
 	
 
 	skeleton.Initialize();
 	player.Initialize();
+	framerate.Initialize();
+
+
 
 	skeleton.Load();
 	player.Load();
-
+	framerate.Load();
+	Clock clock;
 	while (window.isOpen()) 
 	{	
 		while (optional<Event> event = window.pollEvent())
@@ -42,16 +52,22 @@ int main()
 				}
 			}
 		}
+		Time deltaTimeTimer = clock.restart();
+		float deltaTime = deltaTimeTimer.asMilliseconds();
 
-
+		framerate.Update(deltaTime,skeleton);
 		skeleton.Update();
-		player.Update(skeleton);
+		player.Update(deltaTime, skeleton);
 		
 		window.clear(Color::Black);
+
+		
 		skeleton.Draw(window);
 		player.Draw(window);
+		framerate.Draw(window);
 		
 		window.display();
+
 	}
 	return 0;
 }

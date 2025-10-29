@@ -34,31 +34,31 @@ void Player::Load()
 	}
 }
 
-void Player::Update(Skeleton &skeleton)
+void Player::Update(float deltaTime, Skeleton &skeleton)
 {
 	Vector2f playerPosition = sprite.getPosition();
 	int speed = 4;
 	boundingRectangle.setPosition(playerPosition);
 	if (Keyboard::isKeyPressed(Keyboard::Scan::W))
 	{
-		sprite.setPosition({ playerPosition.x, playerPosition.y - speed });
-		boundingRectangle.setPosition({ playerPosition.x, playerPosition.y - speed });
+		sprite.setPosition(playerPosition + Vector2f{0,-1} *movementSpeed * deltaTime);
+		boundingRectangle.setPosition(playerPosition + Vector2f{ 0,-1 }*movementSpeed * deltaTime);
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Scan::A))
 	{
-		sprite.setPosition({ playerPosition.x - speed, playerPosition.y });
-		boundingRectangle.setPosition({ playerPosition.x - speed, playerPosition.y });
+		sprite.setPosition(playerPosition + Vector2f{ -1,0 }*movementSpeed * deltaTime);
+		boundingRectangle.setPosition(playerPosition + Vector2f{ -1,0 }*movementSpeed * deltaTime);
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Scan::S))
 	{
-		sprite.setPosition({ playerPosition.x, playerPosition.y + speed });
-		boundingRectangle.setPosition({ playerPosition.x, playerPosition.y + speed });
+		sprite.setPosition(playerPosition + Vector2f{ 0,1 }*movementSpeed * deltaTime);
+		boundingRectangle.setPosition(playerPosition + Vector2f{ 0,1 }*movementSpeed * deltaTime);
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Scan::D))
 	{
 
-		sprite.setPosition({ playerPosition.x + speed, playerPosition.y });
-		boundingRectangle.setPosition({ playerPosition.x + speed, playerPosition.y });
+		sprite.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
+		boundingRectangle.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
 	}
 	if (Mouse::isButtonPressed(Mouse::Button::Left))
 	{
@@ -71,7 +71,7 @@ void Player::Update(Skeleton &skeleton)
 		Vector2f bulletDirection;
 		bulletDirection = skeleton.sprite.getPosition() - bullets[i].getPosition();
 		bulletDirection = Math::normalizeVector(bulletDirection);
-		bullets[i].setPosition(bullets[i].getPosition() + bulletDirection * bulletSpeed);
+		bullets[i].setPosition(bullets[i].getPosition() + bulletDirection * bulletSpeed * deltaTime);
 	}
 
 	if (Math::checkRectCollision(sprite.getGlobalBounds(), skeleton.sprite.getGlobalBounds()))

@@ -11,7 +11,8 @@ class Player
 private:
 	Texture texture;
 	vector<RectangleShape>bullets;
-	float bulletSpeed = 4;
+	float movementSpeed = 1;
+	float bulletSpeed = 0.5;
 	Vector2i size;
 
 	RectangleShape boundingRectangle;
@@ -26,7 +27,7 @@ public:
 
 	void Initialize();
 	void Load();
-	void Update(Skeleton& skeleton);
+	void Update(float deltaTime, Skeleton& skeleton);
 	void Draw(RenderWindow &window);
 };
 
