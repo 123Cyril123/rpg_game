@@ -13,6 +13,8 @@ private:
 	vector<RectangleShape>bullets;
 	float movementSpeed = 1;
 	float bulletSpeed = 0.5;
+	float maxFireRate;
+	float fireRateTimer;
 	Vector2i size;
 
 	RectangleShape boundingRectangle;
@@ -23,7 +25,7 @@ public:
 
 
 public:
-	Player() : sprite(texture) {}
+	Player() : sprite(texture), maxFireRate(100), fireRateTimer(0) {}
 
 	void Initialize();
 	void Load();

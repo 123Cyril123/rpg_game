@@ -60,11 +60,15 @@ void Player::Update(float deltaTime, Skeleton &skeleton)
 		sprite.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
 		boundingRectangle.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
 	}
-	if (Mouse::isButtonPressed(Mouse::Button::Left))
+
+	//-----------------------------------bullet---------------------------------------------------------------------
+	fireRateTimer += deltaTime;
+	if (Mouse::isButtonPressed(Mouse::Button::Left) && fireRateTimer >= maxFireRate)
 	{
 		RectangleShape bullet({ 10,5 });
 		bullets.push_back(bullet);
 		bullets[bullets.size() - 1].setPosition(sprite.getPosition());
+		fireRateTimer = 0;
 	}
 	for (size_t i = 0; i < bullets.size(); i++)
 	{
@@ -72,14 +76,15 @@ void Player::Update(float deltaTime, Skeleton &skeleton)
 		bulletDirection = skeleton.sprite.getPosition() - bullets[i].getPosition();
 		bulletDirection = Math::normalizeVector(bulletDirection);
 		bullets[i].setPosition(bullets[i].getPosition() + bulletDirection * bulletSpeed * deltaTime);
+		if (Math::checkRectCollision(bullets[i].getGlobalBounds(), skeleton.sprite.getGlobalBounds()))
+		{
+			bullets.erase(bullets.begin() + i);
+			skeleton.changeHealth(-10);
+			cout << "Skeleton hp: " << skeleton.health << endl;
+		}
 	}
+	//-----------------------------------bullet---------------------------------------------------------------------
 
-	if (Math::checkRectCollision(sprite.getGlobalBounds(), skeleton.sprite.getGlobalBounds()))
-	{
-		cout << "Collision" << endl;
-	}
-	else
-		cout << "No collision" << endl;
 }
 
 void Player::Draw(RenderWindow &window)

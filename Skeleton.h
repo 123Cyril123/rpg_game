@@ -7,15 +7,20 @@ class Skeleton
 private:
 	Texture texture;
 	Vector2i size;
-
+	
+	Font font;
+	Text healthText;
 	RectangleShape boundingRectangle;
 
 public:
 	Sprite sprite;
+	int health;
 
 public:
-	Skeleton() : sprite(texture) {}
+	Skeleton();
+	~Skeleton();
 
+	void changeHealth(int hp);
 	void Initialize();
 	void Load();
 	void Update();
