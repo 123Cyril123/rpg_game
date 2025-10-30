@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include "Skeleton.h"
+#include "Bullet.h"
 
 using namespace std;
 using namespace sf; 
@@ -10,9 +11,9 @@ class Player
 {
 private:
 	Texture texture;
-	vector<RectangleShape>bullets;
+	vector<Bullet>bullets;
 	float movementSpeed = 1;
-	float bulletSpeed = 0.5;
+	float bulletSpeed;
 	float maxFireRate;
 	float fireRateTimer;
 	Vector2i size;
@@ -29,7 +30,7 @@ public:
 
 	void Initialize();
 	void Load();
-	void Update(float deltaTime, Skeleton& skeleton);
+	void Update(float deltaTime, Skeleton& skeleton, Vector2f &mousePosition);
 	void Draw(RenderWindow &window);
 };
 

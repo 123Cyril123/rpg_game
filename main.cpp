@@ -54,10 +54,11 @@ int main()
 		}
 		Time deltaTimeTimer = clock.restart();
 		float deltaTime = deltaTimeTimer.asMilliseconds();
+		Vector2f mousePosition = Vector2f(Mouse::getPosition(window));
 
 		framerate.Update(deltaTime,skeleton);
 		skeleton.Update();
-		player.Update(deltaTime, skeleton);
+		player.Update(deltaTime, skeleton, mousePosition);
 		
 		window.clear(Color::Black);
 

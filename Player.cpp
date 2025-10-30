@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Skeleton.h"
 #include "Math.h"
+#include "Bullet.h"
 
 using namespace std;
 using namespace sf;
@@ -34,7 +35,7 @@ void Player::Load()
 	}
 }
 
-void Player::Update(float deltaTime, Skeleton &skeleton)
+void Player::Update(float deltaTime, Skeleton &skeleton, Vector2f &mousePosition)
 {
 	Vector2f playerPosition = sprite.getPosition();
 	int speed = 4;
@@ -65,23 +66,27 @@ void Player::Update(float deltaTime, Skeleton &skeleton)
 	fireRateTimer += deltaTime;
 	if (Mouse::isButtonPressed(Mouse::Button::Left) && fireRateTimer >= maxFireRate)
 	{
-		RectangleShape bullet({ 10,5 });
-		bullets.push_back(bullet);
-		bullets[bullets.size() - 1].setPosition(sprite.getPosition());
+		
+		bullets.push_back(Bullet());
+		bullets[bullets.size() - 1].Initialize(sprite.getPosition(), mousePosition, 3);
 		fireRateTimer = 0;
 	}
 	for (size_t i = 0; i < bullets.size(); i++)
 	{
 		Vector2f bulletDirection;
-		bulletDirection = skeleton.sprite.getPosition() - bullets[i].getPosition();
-		bulletDirection = Math::normalizeVector(bulletDirection);
-		bullets[i].setPosition(bullets[i].getPosition() + bulletDirection * bulletSpeed * deltaTime);
-		if (Math::checkRectCollision(bullets[i].getGlobalBounds(), skeleton.sprite.getGlobalBounds()))
+		
+		bullets[i].Update(deltaTime);
+
+		if (skeleton.health > 0)
 		{
-			bullets.erase(bullets.begin() + i);
-			skeleton.changeHealth(-10);
-			cout << "Skeleton hp: " << skeleton.health << endl;
+			if (Math::checkRectCollision(bullets[i].GetGlobalBounds(), skeleton.sprite.getGlobalBounds()))
+			{
+				bullets.erase(bullets.begin() + i);
+				skeleton.changeHealth(-10);
+				cout << "Skeleton hp: " << skeleton.health << endl;
+			}
 		}
+		
 	}
 	//-----------------------------------bullet---------------------------------------------------------------------
 
@@ -92,7 +97,7 @@ void Player::Draw(RenderWindow &window)
 	window.draw(sprite);
 	for (size_t i = 0; i < bullets.size(); i++)
 	{
-		window.draw(bullets[i]);
+		bullets[i].Draw(window);
 	}
 
 	window.draw(boundingRectangle);

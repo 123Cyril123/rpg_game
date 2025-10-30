@@ -60,15 +60,24 @@ void Skeleton::Load()
 	}
 }
 
-void Skeleton::Update() {
-	boundingRectangle.setPosition(sprite.getPosition());
+void Skeleton::Update() 
+{
+	if (health > 0)
+	{
+		boundingRectangle.setPosition(sprite.getPosition());
+	}
+	
 	
 
 }
 
 void Skeleton::Draw(RenderWindow &window)
 {	
-	window.draw(healthText);
-	window.draw(sprite);
-	window.draw(boundingRectangle);
+	if (health > 0)
+	{
+		window.draw(healthText);
+		window.draw(sprite);
+		window.draw(boundingRectangle);
+	}
+	
 }
