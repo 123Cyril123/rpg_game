@@ -21,7 +21,7 @@ void Player::Initialize()
 
 void Player::Load()
 {
-	if (texture.loadFromFile("Project1/assets/player/textures/characters.png"))
+	if (texture.loadFromFile("Project1/assets/player/textures/characters.png")) // Project1/assets/player/textures/characters.png
 	{
 		int XIndex = 0;
 		int YIndex = 0;

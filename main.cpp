@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "Skeleton.h"
 #include "FrameRate.h"
+#include "map.h"
 using namespace std;
 using namespace sf;
 
@@ -17,7 +18,7 @@ int main()
 	window.setVerticalSyncEnabled(true);
 
 
-
+	map map;
 	Skeleton skeleton;
 	Player player;
 	FrameRate framerate;
@@ -28,7 +29,7 @@ int main()
 	framerate.Initialize();
 
 
-
+	map.Load();
 	skeleton.Load();
 	player.Load();
 	framerate.Load();
@@ -53,7 +54,7 @@ int main()
 			}
 		}
 		Time deltaTimeTimer = clock.restart();
-		float deltaTime = deltaTimeTimer.asMilliseconds();
+		float deltaTime = (float)deltaTimeTimer.asMilliseconds();
 		Vector2f mousePosition = Vector2f(Mouse::getPosition(window));
 
 		framerate.Update(deltaTime,skeleton);
@@ -62,7 +63,7 @@ int main()
 		
 		window.clear(Color::Black);
 
-		
+		map.Draw(window);
 		skeleton.Draw(window);
 		player.Draw(window);
 		framerate.Draw(window);
