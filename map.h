@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <vector>
 using namespace sf;
 using namespace std;
 
@@ -8,10 +9,15 @@ class map
 {
 private:
 	Texture tileSheetTexture;
-	Sprite sprite;
+	const static int spritesSize = 10;
+	std::vector<Sprite> sprites; // Use vector instead of raw pointer
+	int tileHeight;
+	int tileWidth;
+	int totalTilesX;
+	int totalTilesY;
 	
 
-public:
+public:		
 	map();
 	~map();
 
@@ -20,4 +26,9 @@ public:
 	void Update();
 	void Draw(RenderWindow& window);
 };
+
+
+
+ 
+
 
