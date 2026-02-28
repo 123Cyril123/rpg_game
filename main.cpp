@@ -1,18 +1,65 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <math.h>
+#include <vector>
 
 #include "Player.h"
 #include "Skeleton.h"
 #include "FrameRate.h"
+#include "Math.h"
 #include "map.h"
+#include "Item.h"
+
 using namespace std;
 using namespace sf;
 
+void SpawnItems(vector<Item>& items, int count)
+{
+	items.clear();
+	for (int i = 0; i < count; i++)
+	{
+		Item newItem;
+		float randomX = (rand() % 1780) + 100;
+		float randomY = (rand() % 850) + 100;
 
+		newItem.Initialize(Vector2f(randomX, randomY));
+		items.push_back(newItem);
+	}
+}
+
+void SpawnBullets(vector<Bullet>& enemyBullets, Vector2f playerPosition, float speed)
+{
+	int edge = rand() % 4;
+	float startX, startY;
+
+	if (edge == 0)   // nahore
+	{
+		startX = (rand() % 1980);
+		startY = -50;
+	}
+	else if (edge == 1)  // prava strana
+	{
+		startX = 2030;
+		startY = (rand() % 1050);
+	}
+	else if (edge == 2)  // dole
+	{
+		startX = (rand() % 1980);
+		startY = 1100;
+	}
+	else {  // leva strana
+		startX = -50;
+		startY = (rand() & 1050);
+	}
+	Bullet newBullet;
+	newBullet.Initialize(Vector2f{ startX, startY }, playerPosition, speed);
+	enemyBullets.push_back(newBullet);
+}
 
 int main()
 {	
+	srand(static_cast<unsigned>(time(NULL)));
+
 	RenderWindow window(VideoMode({ 1980,1050 }), "RPG Game", Style::Default);
 	window.setFramerateLimit(144);
 	window.setVerticalSyncEnabled(true);
@@ -24,15 +71,25 @@ int main()
 	FrameRate framerate;
 	
 
-	skeleton.Initialize();
 	player.Initialize();
 	framerate.Initialize();
 
 
 	map.Load();
-	skeleton.Load();
 	player.Load();
 	framerate.Load();
+
+	int currentLevel = 1;
+	int itemsCollected = 0;
+	int itemsNeeded = 5;
+	vector<Item> activeItems;
+	float enemySpawnTimer = 0;
+	float currentSpawnRate = 800.0f;
+	float enemyBulletSpeed = 0.5f;
+	vector<Bullet> enemyBullets;
+
+	SpawnItems(activeItems, itemsNeeded);
+
 	Clock clock;
 	while (window.isOpen()) 
 	{	
@@ -60,11 +117,81 @@ int main()
 		framerate.Update(deltaTime,skeleton);
 		skeleton.Update();
 		player.Update(deltaTime, skeleton, mousePosition);
+
+		enemySpawnTimer += deltaTime;
+		if (enemySpawnTimer >= currentSpawnRate)
+		{
+			SpawnBullets(enemyBullets, player.sprite.getPosition(), enemyBulletSpeed);
+			enemySpawnTimer = 0;
+		}
+
+		for (int i = 0; i < enemyBullets.size(); i++)
+		{
+			enemyBullets[i].Update(deltaTime);
+
+			if (Math::checkRectCollision(player.sprite.getGlobalBounds(), enemyBullets[i].GetGlobalBounds()))
+			{
+				enemyBullets.erase(enemyBullets.begin() + i);
+				i--;
+				currentLevel = 1;
+				itemsCollected = 0;
+				itemsNeeded = 5;
+
+				enemyBullets.clear();
+				SpawnItems(activeItems, itemsNeeded);
+				player.sprite.setPosition({ 990.0f, 525.0f });
+				break;
+			}
+
+			Vector2f pos = enemyBullets[i].GetGlobalBounds().position;
+			if (pos.x < -500 || pos.x > 2500 || pos.y < -500 || pos.y > 1500)
+			{
+				enemyBullets.erase(enemyBullets.begin() + i);
+				i--;
+			}
+		}
+
+		for (auto& item : activeItems)
+		{
+			item.Update(deltaTime);
+		}
+
+		for (int i = 0; i < activeItems.size(); i++)
+		{
+			if (Math::checkRectCollision(player.sprite.getGlobalBounds(), activeItems[i].GetGlobalBounds()))
+			{
+				activeItems.erase(activeItems.begin() + i);
+				itemsCollected++;
+				
+				break;
+			}
+		}
+
+		if (itemsCollected >= itemsNeeded)
+		{
+			currentLevel++;
+			itemsCollected = 0;
+			itemsNeeded++;
+			enemyBullets.clear();
+
+			SpawnItems(activeItems, itemsNeeded);
+
+			player.sprite.setPosition({ 990,525 });
+		}
 		
 		window.clear(Color::Black);
 
 		map.Draw(window);
-		skeleton.Draw(window);
+
+		for (auto& item : activeItems)
+		{
+			item.Draw(window);
+		}
+
+		for (auto& bullet : enemyBullets)
+		{
+			bullet.Draw(window);
+		}
 		player.Draw(window);
 		framerate.Draw(window);
 		

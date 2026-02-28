@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="FrameRate.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="Math.cpp" />
@@ -158,6 +159,7 @@
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="FrameRate.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Player.h" />

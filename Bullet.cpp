@@ -22,6 +22,7 @@ void Bullet::Load()
 
 }
 
+
 void Bullet::Update(float deltaTime)
 {
 	rectangleshape.setPosition(rectangleshape.getPosition() + direction * speed * deltaTime);

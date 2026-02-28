@@ -12,7 +12,7 @@ class Player
 private:
 	Texture texture;
 	vector<Bullet>bullets;
-	float movementSpeed = 1;
+	float movementSpeed = 0.5;
 	float bulletSpeed;
 	float maxFireRate;
 	float fireRateTimer;

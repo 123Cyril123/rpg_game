@@ -10,9 +10,9 @@ using namespace sf;
 void Player::Initialize()
 {	
 	boundingRectangle.setFillColor(Color::Transparent);
-	boundingRectangle.setOutlineColor(Color::Red);
+	boundingRectangle.setOutlineColor(Color::Transparent);
 	boundingRectangle.setOutlineThickness(3);
-	sprite.scale({ 4,4 });
+	sprite.scale({ 2,2 });
 	size = { 32,32 };
 	boundingRectangle.setSize({ size.x * sprite.getScale().x, size.y * sprite.getScale().y});
 	
@@ -35,32 +35,77 @@ void Player::Load()
 	}
 }
 
-void Player::Update(float deltaTime, Skeleton &skeleton, Vector2f &mousePosition)
-{
-	Vector2f playerPosition = sprite.getPosition();
-	int speed = 4;
-	boundingRectangle.setPosition(playerPosition);
-	if (Keyboard::isKeyPressed(Keyboard::Scan::W))
-	{
-		sprite.setPosition(playerPosition + Vector2f{0,-1} *movementSpeed * deltaTime);
-		boundingRectangle.setPosition(playerPosition + Vector2f{ 0,-1 }*movementSpeed * deltaTime);
-	}
-	if (Keyboard::isKeyPressed(Keyboard::Scan::A))
-	{
-		sprite.setPosition(playerPosition + Vector2f{ -1,0 }*movementSpeed * deltaTime);
-		boundingRectangle.setPosition(playerPosition + Vector2f{ -1,0 }*movementSpeed * deltaTime);
-	}
-	if (Keyboard::isKeyPressed(Keyboard::Scan::S))
-	{
-		sprite.setPosition(playerPosition + Vector2f{ 0,1 }*movementSpeed * deltaTime);
-		boundingRectangle.setPosition(playerPosition + Vector2f{ 0,1 }*movementSpeed * deltaTime);
-	}
-	if (Keyboard::isKeyPressed(Keyboard::Scan::D))
-	{
+//void Player::Update(float deltaTime, Skeleton &skeleton, Vector2f &mousePosition)
+//{
+//	Vector2f playerPosition = sprite.getPosition();
+//	int speed = 4;
+//	boundingRectangle.setPosition(playerPosition);
+//	if (Keyboard::isKeyPressed(Keyboard::Scan::W))
+//	{
+//		sprite.setPosition(playerPosition + Vector2f{0,-1} *movementSpeed * deltaTime);
+//		boundingRectangle.setPosition(playerPosition + Vector2f{ 0,-1 }*movementSpeed * deltaTime);
+//	}
+//	if (Keyboard::isKeyPressed(Keyboard::Scan::A))
+//	{
+//		sprite.setPosition(playerPosition + Vector2f{ -1,0 }*movementSpeed * deltaTime);
+//		boundingRectangle.setPosition(playerPosition + Vector2f{ -1,0 }*movementSpeed * deltaTime);
+//	}
+//	if (Keyboard::isKeyPressed(Keyboard::Scan::S))
+//	{
+//		sprite.setPosition(playerPosition + Vector2f{ 0,1 }*movementSpeed * deltaTime);
+//		boundingRectangle.setPosition(playerPosition + Vector2f{ 0,1 }*movementSpeed * deltaTime);
+//	}
+//	if (Keyboard::isKeyPressed(Keyboard::Scan::D))
+//	{
+//
+//		sprite.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
+//		boundingRectangle.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
+//	}
 
-		sprite.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
-		boundingRectangle.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
-	}
+	void Player::Update(float deltaTime, Skeleton & skeleton, Vector2f & mousePosition)
+	{
+		Vector2f playerPosition = sprite.getPosition();
+		Vector2f movementDirection(0.f, 0.f); 
+
+		if (Keyboard::isKeyPressed(Keyboard::Scan::W))
+		{
+			movementDirection.y -= 1.f;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Scan::S))
+		{
+			movementDirection.y += 1.f;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Scan::A))
+		{
+			movementDirection.x -= 1.f;
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Scan::D))
+		{
+			movementDirection.x += 1.f;
+		}
+
+		if (movementDirection.x != 0.f || movementDirection.y != 0.f)
+		{
+			movementDirection = Math::normalizeVector(movementDirection);
+
+			Vector2f newPosition = playerPosition + (movementDirection * movementSpeed * deltaTime);
+
+			float playerWidth = 64.f;
+			float playerHeight = 64.f;
+
+			if (newPosition.x < 0.f)
+				newPosition.x = 0.f;
+			else if (newPosition.x > 1980.f - playerWidth)
+				newPosition.x = 1980.f - playerWidth;
+
+			if (newPosition.y < 0.f)
+				newPosition.y = 0.f;
+			else if (newPosition.y > 1050.f - playerHeight)
+				newPosition.y = 1050.f - playerHeight;
+
+			sprite.setPosition(newPosition);
+			boundingRectangle.setPosition(newPosition);
+		}
 
 	//-----------------------------------bullet---------------------------------------------------------------------
 	fireRateTimer += deltaTime;

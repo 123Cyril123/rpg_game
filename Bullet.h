@@ -20,9 +20,9 @@ public:
 	void Update(float deltatime);
 	void Draw(RenderWindow& window);
 
-	inline const FloatRect& GetGlobalBounds() 
-	{ 
-		return rectangleshape.getGlobalBounds(); 
+	inline const FloatRect GetGlobalBounds() const
+	{
+		return rectangleshape.getGlobalBounds();
 	}
 };
 

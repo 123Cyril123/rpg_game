@@ -10,7 +10,7 @@ class map
 private:
 	Texture tileSheetTexture;
 	const static int spritesSize = 10;
-	std::vector<Sprite> sprites; // Use vector instead of raw pointer
+	std::vector<Sprite> sprites;
 	int tileHeight;
 	int tileWidth;
 	int totalTilesX;
