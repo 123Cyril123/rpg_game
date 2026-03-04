@@ -14,8 +14,10 @@ FrameRate::~FrameRate()
 void FrameRate::Initialize()
 { 
 	frameRateText.setCharacterSize(20);
-	frameRateText.setFillColor(sf::Color::Red);
-	frameRateText.setPosition({ 20.f, 20.f });
+	frameRateText.setFillColor(Color::White);
+	frameRateText.setOutlineColor(Color::Black);
+	frameRateText.setOutlineThickness(1.0f);
+	frameRateText.setPosition({ 20.f, 60.f });
 
 }
 

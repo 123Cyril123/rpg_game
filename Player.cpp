@@ -14,8 +14,8 @@ void Player::Initialize()
 	boundingRectangle.setOutlineThickness(3);
 	sprite.scale({ 2,2 });
 	size = { 32,32 };
-	boundingRectangle.setSize({ size.x * sprite.getScale().x, size.y * sprite.getScale().y});
-	
+	/*boundingRectangle.setSize({ size.x * sprite.getScale().x, size.y * sprite.getScale().y});*/
+	boundingRectangle.setSize({ 24.f, 38.f });
 	
 }
 
@@ -34,33 +34,6 @@ void Player::Load()
 		return;
 	}
 }
-
-//void Player::Update(float deltaTime, Skeleton &skeleton, Vector2f &mousePosition)
-//{
-//	Vector2f playerPosition = sprite.getPosition();
-//	int speed = 4;
-//	boundingRectangle.setPosition(playerPosition);
-//	if (Keyboard::isKeyPressed(Keyboard::Scan::W))
-//	{
-//		sprite.setPosition(playerPosition + Vector2f{0,-1} *movementSpeed * deltaTime);
-//		boundingRectangle.setPosition(playerPosition + Vector2f{ 0,-1 }*movementSpeed * deltaTime);
-//	}
-//	if (Keyboard::isKeyPressed(Keyboard::Scan::A))
-//	{
-//		sprite.setPosition(playerPosition + Vector2f{ -1,0 }*movementSpeed * deltaTime);
-//		boundingRectangle.setPosition(playerPosition + Vector2f{ -1,0 }*movementSpeed * deltaTime);
-//	}
-//	if (Keyboard::isKeyPressed(Keyboard::Scan::S))
-//	{
-//		sprite.setPosition(playerPosition + Vector2f{ 0,1 }*movementSpeed * deltaTime);
-//		boundingRectangle.setPosition(playerPosition + Vector2f{ 0,1 }*movementSpeed * deltaTime);
-//	}
-//	if (Keyboard::isKeyPressed(Keyboard::Scan::D))
-//	{
-//
-//		sprite.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
-//		boundingRectangle.setPosition(playerPosition + Vector2f{ 1,0 }*movementSpeed * deltaTime);
-//	}
 
 	void Player::Update(float deltaTime, Skeleton & skeleton, Vector2f & mousePosition)
 	{
@@ -83,12 +56,19 @@ void Player::Load()
 		{
 			movementDirection.x += 1.f;
 		}
+					
 
 		if (movementDirection.x != 0.f || movementDirection.y != 0.f)
 		{
 			movementDirection = Math::normalizeVector(movementDirection);
 
-			Vector2f newPosition = playerPosition + (movementDirection * movementSpeed * deltaTime);
+			float currentSpeed = movementSpeed;
+			if (Keyboard::isKeyPressed(Keyboard::Scan::LShift))
+			{
+				currentSpeed = 2.0f * movementSpeed;
+			}
+
+			Vector2f newPosition = playerPosition + (movementDirection * movementSpeed * currentSpeed * deltaTime);
 
 			float playerWidth = 64.f;
 			float playerHeight = 64.f;
@@ -104,7 +84,7 @@ void Player::Load()
 				newPosition.y = 1050.f - playerHeight;
 
 			sprite.setPosition(newPosition);
-			boundingRectangle.setPosition(newPosition);
+			boundingRectangle.setPosition(newPosition + Vector2f(20.f, 26.f));
 		}
 
 	//-----------------------------------bullet---------------------------------------------------------------------

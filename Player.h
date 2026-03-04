@@ -12,7 +12,7 @@ class Player
 private:
 	Texture texture;
 	vector<Bullet>bullets;
-	float movementSpeed = 0.5;
+	float movementSpeed = 0.7f;
 	float bulletSpeed;
 	float maxFireRate;
 	float fireRateTimer;
@@ -32,5 +32,9 @@ public:
 	void Load();
 	void Update(float deltaTime, Skeleton& skeleton, Vector2f &mousePosition);
 	void Draw(RenderWindow &window);
+	inline const FloatRect GetHitboxBounds() const
+	{
+		return boundingRectangle.getGlobalBounds();
+	}
 };
 

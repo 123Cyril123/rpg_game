@@ -2,6 +2,7 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
+#include <string>
 
 #include "Player.h"
 #include "Skeleton.h"
@@ -87,8 +88,32 @@ int main()
 	float currentSpawnRate = 800.0f;
 	float enemyBulletSpeed = 0.5f;
 	vector<Bullet> enemyBullets;
-
 	SpawnItems(activeItems, itemsNeeded);
+
+	Font uiFont;
+	if (!uiFont.openFromFile("Project1/assets/fonts/pala.ttf"))
+	{
+		cout << "User interface not loaded" << endl;
+	}
+	else {
+		cout << "User interface font loaded" << endl;
+	}
+
+	Text uiText(uiFont);
+	uiText.setCharacterSize(36);
+	uiText.setFillColor(Color::White);
+	uiText.setPosition({ 20.0f,20.0f });
+	uiText.setOutlineColor(Color::Black);
+	uiText.setOutlineThickness(2.0f);
+
+	bool isGameOver = false;
+	Text uiText2(uiFont);
+	uiText2.setString("Umrel jsi, stiskni enter");
+	uiText2.setCharacterSize(64);
+	uiText2.setFillColor(Color::Red);
+	uiText2.setOutlineColor(Color::White);
+	uiText2.setOutlineThickness(4.0f);
+	uiText2.setPosition({ 450.0f, 450.0f });
 
 	Clock clock;
 	while (window.isOpen()) 
@@ -113,72 +138,91 @@ int main()
 		Time deltaTimeTimer = clock.restart();
 		float deltaTime = (float)deltaTimeTimer.asMilliseconds();
 		Vector2f mousePosition = Vector2f(Mouse::getPosition(window));
-
-		framerate.Update(deltaTime,skeleton);
-		skeleton.Update();
-		player.Update(deltaTime, skeleton, mousePosition);
-
-		enemySpawnTimer += deltaTime;
-		if (enemySpawnTimer >= currentSpawnRate)
+		if (!isGameOver)
 		{
-			SpawnBullets(enemyBullets, player.sprite.getPosition(), enemyBulletSpeed);
-			enemySpawnTimer = 0;
-		}
 
-		for (int i = 0; i < enemyBullets.size(); i++)
-		{
-			enemyBullets[i].Update(deltaTime);
+		
+			framerate.Update(deltaTime,skeleton);
+			skeleton.Update();
+			player.Update(deltaTime, skeleton, mousePosition);
 
-			if (Math::checkRectCollision(player.sprite.getGlobalBounds(), enemyBullets[i].GetGlobalBounds()))
+			enemySpawnTimer += deltaTime;
+			if (enemySpawnTimer >= currentSpawnRate)
 			{
-				enemyBullets.erase(enemyBullets.begin() + i);
-				i--;
+				SpawnBullets(enemyBullets, player.sprite.getPosition(), enemyBulletSpeed);
+				enemySpawnTimer = 0;
+			}
+
+			for (int i = 0; i < enemyBullets.size(); i++)
+			{
+				enemyBullets[i].Update(deltaTime);
+
+				if (Math::checkRectCollision(player.GetHitboxBounds(), enemyBullets[i].GetGlobalBounds()))
+				{
+					isGameOver = true;
+					break;
+				}
+
+				Vector2f pos = enemyBullets[i].GetGlobalBounds().position;
+				if (pos.x < -500 || pos.x > 2500 || pos.y < -500 || pos.y > 1500)
+				{
+					enemyBullets.erase(enemyBullets.begin() + i);
+					i--;
+				}
+			}
+
+			for (auto& item : activeItems)
+			{
+				item.Update(deltaTime);
+			}
+
+			for (int i = 0; i < activeItems.size(); i++)
+			{
+				if (Math::checkRectCollision(player.GetHitboxBounds(), activeItems[i].GetGlobalBounds()))
+				{
+					activeItems.erase(activeItems.begin() + i);
+					itemsCollected++;
+				
+					break;
+				}
+			}
+
+			if (itemsCollected >= itemsNeeded)
+			{
+				currentLevel++;
+				itemsCollected = 0;
+				itemsNeeded++;
+				enemyBullets.clear();
+
+				SpawnItems(activeItems, itemsNeeded);
+
+				player.sprite.setPosition({ 990,525 });
+			}
+
+
+
+		}
+		else {
+			if (Keyboard::isKeyPressed(Keyboard::Scan::Enter))
+			{
+				isGameOver = false;
 				currentLevel = 1;
 				itemsCollected = 0;
 				itemsNeeded = 5;
 
+				currentSpawnRate = 800.0f;
+				enemyBulletSpeed = 0.5f;
+				enemySpawnTimer = 0;
+
 				enemyBullets.clear();
 				SpawnItems(activeItems, itemsNeeded);
 				player.sprite.setPosition({ 990.0f, 525.0f });
-				break;
-			}
 
-			Vector2f pos = enemyBullets[i].GetGlobalBounds().position;
-			if (pos.x < -500 || pos.x > 2500 || pos.y < -500 || pos.y > 1500)
-			{
-				enemyBullets.erase(enemyBullets.begin() + i);
-				i--;
 			}
 		}
+		uiText.setString("Level: " + to_string(currentLevel) +
+			"   |   Hovinka: " + to_string(itemsCollected) + " / " + to_string(itemsNeeded));
 
-		for (auto& item : activeItems)
-		{
-			item.Update(deltaTime);
-		}
-
-		for (int i = 0; i < activeItems.size(); i++)
-		{
-			if (Math::checkRectCollision(player.sprite.getGlobalBounds(), activeItems[i].GetGlobalBounds()))
-			{
-				activeItems.erase(activeItems.begin() + i);
-				itemsCollected++;
-				
-				break;
-			}
-		}
-
-		if (itemsCollected >= itemsNeeded)
-		{
-			currentLevel++;
-			itemsCollected = 0;
-			itemsNeeded++;
-			enemyBullets.clear();
-
-			SpawnItems(activeItems, itemsNeeded);
-
-			player.sprite.setPosition({ 990,525 });
-		}
-		
 		window.clear(Color::Black);
 
 		map.Draw(window);
@@ -194,9 +238,14 @@ int main()
 		}
 		player.Draw(window);
 		framerate.Draw(window);
-		
-		window.display();
+		window.draw(uiText);
 
+		if (isGameOver)
+		{
+			window.draw(uiText2);
+		}
+
+		window.display();
 	}
 	return 0;
 }
