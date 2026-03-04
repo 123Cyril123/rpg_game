@@ -21,10 +21,9 @@ void Player::Initialize()
 
 void Player::Load()
 {
-	if (texture.loadFromFile("Project1/assets/player/textures/characters.png")) // Project1/assets/player/textures/characters.png
+	if (texture.loadFromFile("Project1/assets/player/textures/mainChar.png")) // Project1/assets/player/textures/characters.png
 	{
-		int XIndex = 0;
-		int YIndex = 0;
+		
 
 		sprite.setTexture(texture);
 		sprite.setTextureRect(IntRect({ XIndex * size.x, YIndex * size.y }, { size.x,size.y }));
@@ -43,19 +42,36 @@ void Player::Load()
 		if (Keyboard::isKeyPressed(Keyboard::Scan::W))
 		{
 			movementDirection.y -= 1.f;
+			YIndex = 2;
+			isFacingLeft = false;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Scan::S))
 		{
 			movementDirection.y += 1.f;
+			YIndex = 0;
+			isFacingLeft = false;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Scan::A))
 		{
 			movementDirection.x -= 1.f;
+			YIndex = 1;
+			isFacingLeft = true;
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Scan::D))
 		{
 			movementDirection.x += 1.f;
+			YIndex = 1;
+			isFacingLeft = false;
 		}
+
+		if (isFacingLeft)
+		{
+			sprite.setTextureRect(IntRect({ (XIndex + 1) * size.x, YIndex * size.y }, { -size.x, size.y }));
+		}
+		else {
+			sprite.setTextureRect(IntRect({ XIndex * size.x, YIndex * size.y }, { size.x, size.y }));
+		}
+		
 					
 
 		if (movementDirection.x != 0.f || movementDirection.y != 0.f)
@@ -84,7 +100,7 @@ void Player::Load()
 				newPosition.y = 1050.f - playerHeight;
 
 			sprite.setPosition(newPosition);
-			boundingRectangle.setPosition(newPosition + Vector2f(20.f, 26.f));
+			boundingRectangle.setPosition(newPosition + Vector2f(20.f, 18.f));
 		}
 
 	//-----------------------------------bullet---------------------------------------------------------------------

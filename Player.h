@@ -16,6 +16,9 @@ private:
 	float bulletSpeed;
 	float maxFireRate;
 	float fireRateTimer;
+	int XIndex = 0;
+	int YIndex = 0;
+	bool isFacingLeft = false;
 	Vector2i size;
 
 	RectangleShape boundingRectangle;

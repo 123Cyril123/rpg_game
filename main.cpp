@@ -61,7 +61,7 @@ int main()
 {	
 	srand(static_cast<unsigned>(time(NULL)));
 
-	RenderWindow window(VideoMode({ 1980,1050 }), "RPG Game", Style::Default);
+	RenderWindow window(VideoMode({ 1980,1050 }), "Hra", Style::Default);
 	window.setFramerateLimit(144);
 	window.setVerticalSyncEnabled(true);
 
@@ -81,6 +81,7 @@ int main()
 	framerate.Load();
 
 	int currentLevel = 1;
+	int score = 0;
 	int itemsCollected = 0;
 	int itemsNeeded = 5;
 	vector<Item> activeItems;
@@ -113,7 +114,7 @@ int main()
 	uiText2.setFillColor(Color::Red);
 	uiText2.setOutlineColor(Color::White);
 	uiText2.setOutlineThickness(4.0f);
-	uiText2.setPosition({ 450.0f, 450.0f });
+	uiText2.setPosition({ 600.0f, 450.0f });
 
 	Clock clock;
 	while (window.isOpen()) 
@@ -182,6 +183,7 @@ int main()
 				{
 					activeItems.erase(activeItems.begin() + i);
 					itemsCollected++;
+					score++;
 				
 					break;
 				}
@@ -190,6 +192,8 @@ int main()
 			if (itemsCollected >= itemsNeeded)
 			{
 				currentLevel++;
+				currentSpawnRate -= 50;
+				enemyBulletSpeed += 0.1f;
 				itemsCollected = 0;
 				itemsNeeded++;
 				enemyBullets.clear();
@@ -207,6 +211,7 @@ int main()
 			{
 				isGameOver = false;
 				currentLevel = 1;
+				score = 0;
 				itemsCollected = 0;
 				itemsNeeded = 5;
 
@@ -221,7 +226,7 @@ int main()
 			}
 		}
 		uiText.setString("Level: " + to_string(currentLevel) +
-			"   |   Hovinka: " + to_string(itemsCollected) + " / " + to_string(itemsNeeded));
+			"   |   Items: " + to_string(itemsCollected) + " / " + to_string(itemsNeeded) + "   |   Score: " + to_string(score));
 
 		window.clear(Color::Black);
 
