@@ -1,8 +1,21 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <math.h>
 #include <vector>
 #include <string>
+
+#ifdef _DEBUG
+#pragma comment(lib, "sfml-graphics-d.lib")
+#pragma comment(lib, "sfml-window-d.lib")
+#pragma comment(lib, "sfml-audio-d.lib")
+#pragma comment(lib, "sfml-system-d.lib")
+#else
+#pragma comment(lib, "sfml-graphics.lib")
+#pragma comment(lib, "sfml-window.lib")
+#pragma comment(lib, "sfml-audio.lib")
+#pragma comment(lib, "sfml-system.lib")
+#endif
 
 #include "Player.h"
 #include "Skeleton.h"
@@ -10,6 +23,7 @@
 #include "Math.h"
 #include "map.h"
 #include "Item.h"
+#include "HighScore.h"
 
 using namespace std;
 using namespace sf;
@@ -116,6 +130,32 @@ int main()
 	uiText2.setOutlineThickness(4.0f);
 	uiText2.setPosition({ 600.0f, 450.0f });
 
+	Music music;
+	if (!music.openFromFile("Project1/assets/audio/gameplaymusic.wav"))
+	{
+		cout << "ERROR: Could not load music file!" << endl;
+	}
+
+	music.setLooping(true); 
+	music.setVolume(50.f);  
+
+	Music gameOverBgm;
+	if (!gameOverBgm.openFromFile("Project1/assets/audio/menumusic.wav"))
+	{
+		cout << "ERROR: Could not load game over music!" << endl;
+	}
+	gameOverBgm.setLooping(true);
+	gameOverBgm.setVolume(50.f);
+	gameOverBgm.setPitch(0.7f);
+
+	float musicDelayTimer = 0.0f;
+	bool isMusicWaiting = true;
+	float delayAmount = 1000;
+
+	HighScore highScoreTracker;
+	string scoreFilePath = "Project1/assets/highscore.txt";
+	highScoreTracker.loadFromFile(scoreFilePath);
+
 	Clock clock;
 	while (window.isOpen()) 
 	{	
@@ -148,6 +188,15 @@ int main()
 			player.Update(deltaTime, skeleton, mousePosition);
 
 			enemySpawnTimer += deltaTime;
+			if (isMusicWaiting)
+			{
+				musicDelayTimer += deltaTime;
+				if (musicDelayTimer >= delayAmount)
+				{
+					music.play();
+					isMusicWaiting = false;
+				}
+			}
 			if (enemySpawnTimer >= currentSpawnRate)
 			{
 				SpawnBullets(enemyBullets, player.sprite.getPosition(), enemyBulletSpeed);
@@ -161,6 +210,7 @@ int main()
 				if (Math::checkRectCollision(player.GetHitboxBounds(), enemyBullets[i].GetGlobalBounds()))
 				{
 					isGameOver = true;
+					highScoreTracker.writeToFile(score, scoreFilePath);
 					break;
 				}
 
@@ -179,7 +229,7 @@ int main()
 
 			for (int i = 0; i < activeItems.size(); i++)
 			{
-				if (Math::checkRectCollision(player.GetHitboxBounds(), activeItems[i].GetGlobalBounds()))
+				if (Math::checkRectCollision(player.GetHitBoxBoundsBoundingRectangle2(), activeItems[i].GetGlobalBounds()))
 				{
 					activeItems.erase(activeItems.begin() + i);
 					itemsCollected++;
@@ -192,9 +242,10 @@ int main()
 			if (itemsCollected >= itemsNeeded)
 			{
 				currentLevel++;
-				currentSpawnRate -= 50;
-				enemyBulletSpeed += 0.1f;
+				currentSpawnRate -= 30;
+				enemyBulletSpeed += 0.075f;
 				itemsCollected = 0;
+				music.setPitch(1.0f + (currentLevel * 0.02f));
 				itemsNeeded++;
 				enemyBullets.clear();
 
@@ -207,6 +258,14 @@ int main()
 
 		}
 		else {
+			if (music.getStatus() == SoundSource::Status::Playing)
+			{
+				music.stop();
+			}
+			if (gameOverBgm.getStatus() != SoundSource::Status::Playing)
+			{
+				gameOverBgm.play();
+			}
 			if (Keyboard::isKeyPressed(Keyboard::Scan::Enter))
 			{
 				isGameOver = false;
@@ -214,6 +273,11 @@ int main()
 				score = 0;
 				itemsCollected = 0;
 				itemsNeeded = 5;
+				gameOverBgm.stop();
+				music.setPitch(1.0f); 
+
+				isMusicWaiting = true;
+				musicDelayTimer = 0.0f;
 
 				currentSpawnRate = 800.0f;
 				enemyBulletSpeed = 0.5f;
@@ -226,7 +290,7 @@ int main()
 			}
 		}
 		uiText.setString("Level: " + to_string(currentLevel) +
-			"   |   Items: " + to_string(itemsCollected) + " / " + to_string(itemsNeeded) + "   |   Score: " + to_string(score));
+			"   |   Items: " + to_string(itemsCollected) + " / " + to_string(itemsNeeded) + "   |   Score: " + to_string(score) + "   |   High Score: " + to_string(highScoreTracker.currentHighScore));
 
 		window.clear(Color::Black);
 

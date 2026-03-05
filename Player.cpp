@@ -15,7 +15,12 @@ void Player::Initialize()
 	sprite.scale({ 2,2 });
 	size = { 32,32 };
 	/*boundingRectangle.setSize({ size.x * sprite.getScale().x, size.y * sprite.getScale().y});*/
-	boundingRectangle.setSize({ 24.f, 38.f });
+	boundingRectangle.setSize({ 24.f, 38.f }); 
+
+	boundingRectangle2.setFillColor(Color::Transparent);
+	boundingRectangle2.setOutlineColor(Color::Transparent);
+	boundingRectangle2.setOutlineThickness(3);
+	boundingRectangle2.setSize({ 50,50 });
 	
 }
 
@@ -101,6 +106,7 @@ void Player::Load()
 
 			sprite.setPosition(newPosition);
 			boundingRectangle.setPosition(newPosition + Vector2f(20.f, 18.f));
+			boundingRectangle2.setPosition(newPosition + Vector2f(7.f, 7.f));
 		}
 
 	//-----------------------------------bullet---------------------------------------------------------------------
@@ -142,4 +148,5 @@ void Player::Draw(RenderWindow &window)
 	}
 
 	window.draw(boundingRectangle);
+	window.draw(boundingRectangle2);
 }

@@ -22,6 +22,7 @@ private:
 	Vector2i size;
 
 	RectangleShape boundingRectangle;
+	RectangleShape boundingRectangle2;
 
 public:
 	Sprite sprite;
@@ -38,6 +39,10 @@ public:
 	inline const FloatRect GetHitboxBounds() const
 	{
 		return boundingRectangle.getGlobalBounds();
+	}
+	inline const FloatRect GetHitBoxBoundsBoundingRectangle2() const
+	{
+		return boundingRectangle2.getGlobalBounds();
 	}
 };
 
