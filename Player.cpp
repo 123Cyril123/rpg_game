@@ -43,7 +43,19 @@ void Player::Load()
 	{
 		Vector2f playerPosition = sprite.getPosition();
 		Vector2f movementDirection(0.f, 0.f); 
-
+		if (isHit)
+		{
+			hitFlashTimer = 200.0f;
+			isHit = false;
+		}
+		if (hitFlashTimer >= 0.0f)
+		{
+			hitFlashTimer -= deltaTime;
+			XIndex = 1;
+		}
+		else {
+			XIndex = 0;
+		}
 		if (Keyboard::isKeyPressed(Keyboard::Scan::W))
 		{
 			movementDirection.y -= 1.f;
@@ -106,7 +118,6 @@ void Player::Load()
 
 			sprite.setPosition(newPosition);
 			boundingRectangle.setPosition(newPosition + Vector2f(20.f, 18.f));
-			boundingRectangle2.setPosition(newPosition + Vector2f(7.f, 7.f));
 		}
 
 	//-----------------------------------bullet---------------------------------------------------------------------

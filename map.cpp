@@ -1,62 +1,74 @@
-#include "map.h"
+﻿#include "map.h"
 
-map::map() : tileWidth(32), tileHeight(32), totalTilesX(0), totalTilesY(0)
-{   
+tMap::tMap() :
+    sprLayer1(texLayer1), sprLayer2(texLayer2),
+    sprLayer3_A(texLayer3), sprLayer3_B(texLayer3),
+    sprLayer4_A(texLayer4), sprLayer4_B(texLayer4)
+{
     cout << "Map object has been created" << endl;
 }
 
-map::~map()
+tMap::~tMap() {}
+
+void tMap::Initialize() {}
+
+void tMap::Load()
 {
+    if (!texLayer1.loadFromFile("Project1/assets/texture/Clouds 3/1.png")) cout << "Chyba: 1.png" << endl;
+    if (!texLayer2.loadFromFile("Project1/assets/texture/Clouds 3/2.png")) cout << "Chyba: 2.png" << endl;
+    if (!texLayer3.loadFromFile("Project1/assets/texture/Clouds 3/3.png")) cout << "Chyba: 3.png" << endl;
+    if (!texLayer4.loadFromFile("Project1/assets/texture/Clouds 3/4.png")) cout << "Chyba: 4.png" << endl;
+
+    sprLayer1.setTexture(texLayer1, true);
+    sprLayer2.setTexture(texLayer2, true);
+
+    sprLayer3_A.setTexture(texLayer3, true);
+    sprLayer3_B.setTexture(texLayer3, true);
+
+    sprLayer4_A.setTexture(texLayer4, true);
+    sprLayer4_B.setTexture(texLayer4, true);
+
+    Vector2u velikostObrazku = texLayer1.getSize();
+    float scaleX = 1980.0f / velikostObrazku.x;
+    float scaleY = 1050.0f / velikostObrazku.y;
+
+    sprLayer1.setScale({ scaleX, scaleY });
+    sprLayer2.setScale({ scaleX, scaleY });
+    sprLayer3_A.setScale({ scaleX, scaleY });
+    sprLayer3_B.setScale({ scaleX, scaleY });
+    sprLayer4_A.setScale({ scaleX, scaleY });
+    sprLayer4_B.setScale({ scaleX, scaleY });
+
+    sprLayer3_B.setPosition({ 1980.f, 0.f });
+    sprLayer4_B.setPosition({ 1980.f, 0.f });
 }
 
-void map::Initialize()
+void tMap::Update(float deltaTime)
 {
-    // optional for now
+    float speed3 = 0.05f * deltaTime;
+    float speed4 = 0.15f * deltaTime;
+
+    sprLayer3_A.move({ -speed3, 0.f });
+    sprLayer3_B.move({ -speed3, 0.f });
+
+    sprLayer4_A.move({ -speed4, 0.f });
+    sprLayer4_B.move({ -speed4, 0.f });
+
+    if (sprLayer3_A.getPosition().x <= -1980.f) sprLayer3_A.setPosition({ 1980.f, 0.f });
+    if (sprLayer3_B.getPosition().x <= -1980.f) sprLayer3_B.setPosition({ 1980.f, 0.f });
+
+    if (sprLayer4_A.getPosition().x <= -1980.f) sprLayer4_A.setPosition({ 1980.f, 0.f });
+    if (sprLayer4_B.getPosition().x <= -1980.f) sprLayer4_B.setPosition({ 1980.f, 0.f });
 }
 
-void map::Load()
+void tMap::Draw(RenderWindow& window)
 {
-    if (!tileSheetTexture.loadFromFile("Project1/assets/world/tileSheet2.png")) {
-        cout << "Failed to load texture!" << endl;
-        return;
-    }
+    window.draw(sprLayer1);
+    window.draw(sprLayer2);
 
-    // calculate how many tiles exist in the sheet
-    totalTilesX = tileSheetTexture.getSize().x / tileWidth;
-    totalTilesY = tileSheetTexture.getSize().y / tileHeight;
+    window.draw(sprLayer3_A);
+    window.draw(sprLayer3_B);
 
-    cout << "Tiles in sheet: " << totalTilesX << " x " << totalTilesY << endl;
-
-    // resize vector to hold all tiles
-    sprites.clear();
-    sprites.reserve(totalTilesX * totalTilesY);
-
-    // generate grid of sprites
-    for (int y = 0; y < 50; y++)
-    {
-        for (int x = 0; x < 100; x++)
-        {
-            Sprite sprite(tileSheetTexture);
-            sprite.setTexture(tileSheetTexture);
-            sprite.setScale({ 3, 3 });
-            Vector2f scale = sprite.getScale();
-            sprite.setTextureRect(IntRect({ 4 * tileWidth, 0 * tileHeight }, { tileWidth, tileHeight }));
-            sprite.setPosition({ static_cast<float>(0 + x * tileWidth * scale.x), static_cast<float>(0 + y * tileHeight * scale.y) });
-            // optional scaling
-            
-            sprites.push_back(sprite);
-        }
-    }
-    cout << "Map loaded successfully with " << sprites.size() << " tiles!" << endl;
-}
-
-void map::Update()
-{
-    // optional, implement animation or scrolling here
-}
-
-void map::Draw(RenderWindow& window)
-{
-    for (auto& sprite : sprites)
-        window.draw(sprite);
+    window.draw(sprLayer4_A);
+    window.draw(sprLayer4_B);
 }

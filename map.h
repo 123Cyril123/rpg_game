@@ -1,30 +1,27 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <vector>
+
 using namespace sf;
 using namespace std;
 
-class map
+class tMap
 {
 private:
-	Texture tileSheetTexture;
-	const static int spritesSize = 10;
-	std::vector<Sprite> sprites;
-	int tileHeight;
-	int tileWidth;
-	int totalTilesX;
-	int totalTilesY;
-	
+    Texture texLayer1, texLayer2, texLayer3, texLayer4;
+    Sprite sprLayer1, sprLayer2;
 
-public:		
-	map();
-	~map();
+    Sprite sprLayer3_A, sprLayer3_B;
+    Sprite sprLayer4_A, sprLayer4_B;
 
-	void Initialize();
-	void Load();
-	void Update();
-	void Draw(RenderWindow& window);
+public:
+    tMap();
+    ~tMap();
+
+    void Initialize();
+    void Load();
+    void Update(float deltaTime);
+    void Draw(RenderWindow& window);
 };
 
 

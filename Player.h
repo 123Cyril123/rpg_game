@@ -18,14 +18,18 @@ private:
 	float fireRateTimer;
 	int XIndex = 0;
 	int YIndex = 0;
+	float hitFlashTimer = 0.0f;
 	bool isFacingLeft = false;
+	
 	Vector2i size;
 
 	RectangleShape boundingRectangle;
-	RectangleShape boundingRectangle2;
+	
 
 public:
 	Sprite sprite;
+	RectangleShape boundingRectangle2;
+	bool isHit = false;
  
 
 

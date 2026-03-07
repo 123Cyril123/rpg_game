@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+﻿#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <math.h>
@@ -80,7 +80,7 @@ int main()
 	window.setVerticalSyncEnabled(true);
 
 
-	map map;
+	tMap map;
 	Skeleton skeleton;
 	Player player;
 	FrameRate framerate;
@@ -96,13 +96,48 @@ int main()
 
 	int currentLevel = 1;
 	int score = 0;
+	int health = 3;
+	Texture heartTexture;
+	if (!heartTexture.loadFromFile("Project1/assets/texture/heart2.png"))
+	{
+		cout << "Chyba: Nelze nacist heart.png" << endl;
+	}
+	vector<Sprite> hpHearts;
+	for (int i = 0; i < 3; i++)
+	{
+		Sprite heartSprite(heartTexture);
+		heartSprite.setTexture(heartTexture);
+
+		heartSprite.setScale({ 0.1f, 0.1f });
+
+		heartSprite.setPosition({ 20.0f + (i * 40.0f), 90.0f });
+
+		hpHearts.push_back(heartSprite);
+	}
+
+	vector<RectangleShape> powerUps;
+	float powerUpSpawnTimer = 0.0f;
+	float powerUpSpawnRate = 15000.0f;
+	bool isTimeSlowed = false;
+	float slowTimeTimer = 0.0f;
+	float slowDuration = 3000.0f;
+
+	vector<RectangleShape> magnets;
+	float magnetSpawnTimer = 0.0f;
+	float magnetSpawnRate = 30000.0f;
+	float magnetDurationTimer = 0.0f;
+	float magnetDuration = 6000.0f;
+	bool isMagnetInUse = false;
+
+	vector<Item> activeItems;
 	int itemsCollected = 0;
 	int itemsNeeded = 5;
-	vector<Item> activeItems;
+	
+	vector<Bullet> enemyBullets;
 	float enemySpawnTimer = 0;
 	float currentSpawnRate = 800.0f;
 	float enemyBulletSpeed = 0.5f;
-	vector<Bullet> enemyBullets;
+	
 	SpawnItems(activeItems, itemsNeeded);
 
 	Font uiFont;
@@ -179,10 +214,10 @@ int main()
 		Time deltaTimeTimer = clock.restart();
 		float deltaTime = (float)deltaTimeTimer.asMilliseconds();
 		Vector2f mousePosition = Vector2f(Mouse::getPosition(window));
+		
 		if (!isGameOver)
 		{
-
-		
+			map.Update(deltaTime);
 			framerate.Update(deltaTime,skeleton);
 			skeleton.Update();
 			player.Update(deltaTime, skeleton, mousePosition);
@@ -203,24 +238,7 @@ int main()
 				enemySpawnTimer = 0;
 			}
 
-			for (int i = 0; i < enemyBullets.size(); i++)
-			{
-				enemyBullets[i].Update(deltaTime);
 
-				if (Math::checkRectCollision(player.GetHitboxBounds(), enemyBullets[i].GetGlobalBounds()))
-				{
-					isGameOver = true;
-					highScoreTracker.writeToFile(score, scoreFilePath);
-					break;
-				}
-
-				Vector2f pos = enemyBullets[i].GetGlobalBounds().position;
-				if (pos.x < -500 || pos.x > 2500 || pos.y < -500 || pos.y > 1500)
-				{
-					enemyBullets.erase(enemyBullets.begin() + i);
-					i--;
-				}
-			}
 
 			for (auto& item : activeItems)
 			{
@@ -253,6 +271,124 @@ int main()
 
 				player.sprite.setPosition({ 990,525 });
 			}
+			powerUpSpawnTimer += deltaTime;
+			if (powerUpSpawnTimer >= powerUpSpawnRate)
+			{
+				powerUpSpawnTimer = 0.0f;
+				RectangleShape bonus;
+				bonus.setSize({ 25.0f,25.0f });
+				bonus.setFillColor(Color(0, 255, 255));
+				bonus.setOutlineColor(Color::White);
+				bonus.setOutlineThickness(2.0f);
+				bonus.setPosition({ (float)(rand() % 1800 + 100), (float)(rand() % 900 + 100) });
+
+				powerUps.push_back(bonus);
+
+			}
+
+			if (currentLevel >= 3)
+			{
+				magnetSpawnTimer += deltaTime;
+				if (magnetSpawnTimer >= magnetSpawnRate)
+				{
+					magnetSpawnTimer = 0.0f;
+					RectangleShape magnet;
+					magnet.setSize({ 25.0f,25.0f });
+					magnet.setFillColor(Color::Red);
+					magnet.setOutlineColor(Color::White);
+					magnet.setOutlineThickness(2.0f);
+					magnet.setPosition({ (float)(rand() % 1800 + 100), (float)(rand() % 900 + 100) });
+
+					magnets.push_back(magnet);
+				}
+			}
+			for (int i = 0; i < magnets.size(); i++)
+			{
+				if (Math::checkRectCollision(player.GetHitBoxBoundsBoundingRectangle2(), magnets[i].getGlobalBounds()))
+				{
+					magnets.erase(magnets.begin() + i);
+					isMagnetInUse = true;
+					magnetDurationTimer = 0.0f;
+					break;
+
+				}
+			}
+
+			if (isMagnetInUse)
+			{
+				magnetDurationTimer += deltaTime;
+
+				
+				player.boundingRectangle2.setSize({ 600.f, 600.f });
+
+			
+				player.boundingRectangle2.setPosition(player.sprite.getPosition() + Vector2f(-268.f, -268.f));
+
+				if (magnetDurationTimer >= magnetDuration)
+				{
+					isMagnetInUse = false; 
+				}
+			}
+			else
+			{
+				player.boundingRectangle2.setSize({ 50.f, 50.f });
+
+				player.boundingRectangle2.setPosition(player.sprite.getPosition() + Vector2f(7.f, 7.f));
+			}
+
+			for (int i = 0; i < powerUps.size(); i++)
+			{
+				if (Math::checkRectCollision(player.GetHitBoxBoundsBoundingRectangle2(), powerUps[i].getGlobalBounds()))
+				{
+					powerUps.erase(powerUps.begin() + i); 
+					isTimeSlowed = true;
+					slowTimeTimer = 0.0f; 
+					break;
+				}
+			}
+			float bulletDeltaTime = deltaTime;
+
+			if (isTimeSlowed)
+			{
+				slowTimeTimer += deltaTime;
+				bulletDeltaTime = deltaTime * 0.3f;
+
+				if (slowTimeTimer >= slowDuration)
+				{
+					isTimeSlowed = false;
+				}
+			}
+
+			for (int i = 0; i < enemyBullets.size(); i++)
+			{
+				enemyBullets[i].Update(bulletDeltaTime);
+
+				if (Math::checkRectCollision(player.GetHitboxBounds(), enemyBullets[i].GetGlobalBounds()))
+				{
+					health--;
+					player.isHit = true;
+
+					if (health <= 0)
+					{
+						isGameOver = true;
+						highScoreTracker.writeToFile(score, scoreFilePath);
+						break; 
+					}
+					else
+					{
+						enemyBullets.erase(enemyBullets.begin() + i);
+						i--; 
+						continue; 
+					}
+				}
+
+				Vector2f pos = enemyBullets[i].GetGlobalBounds().position;
+				if (pos.x < -500 || pos.x > 2500 || pos.y < -500 || pos.y > 1500)
+				{
+					enemyBullets.erase(enemyBullets.begin() + i);
+					i--;
+				}
+			}
 
 
 
@@ -274,7 +410,8 @@ int main()
 				itemsCollected = 0;
 				itemsNeeded = 5;
 				gameOverBgm.stop();
-				music.setPitch(1.0f); 
+				music.setPitch(1.0f);
+				player.isHit = false;
 
 				isMusicWaiting = true;
 				musicDelayTimer = 0.0f;
@@ -282,6 +419,18 @@ int main()
 				currentSpawnRate = 800.0f;
 				enemyBulletSpeed = 0.5f;
 				enemySpawnTimer = 0;
+
+				powerUps.clear();
+				powerUpSpawnTimer = 0.0f;
+				isTimeSlowed = false;
+				slowTimeTimer = 0.0f;
+				health = 3;
+
+				magnets.clear();
+				magnetSpawnTimer = 0.0f;
+				isMagnetInUse = false;
+				magnetDurationTimer = 0.0f;
+				player.boundingRectangle2.setSize({ 50.f, 50.f });
 
 				enemyBullets.clear();
 				SpawnItems(activeItems, itemsNeeded);
@@ -299,6 +448,21 @@ int main()
 		for (auto& item : activeItems)
 		{
 			item.Draw(window);
+		}
+
+		for (auto& bonus : powerUps)
+		{
+			window.draw(bonus);
+		}
+
+		for (int i = 0; i < health; i++)
+		{
+			window.draw(hpHearts[i]);
+		}
+
+		for (auto& mag : magnets)
+		{
+			window.draw(mag);
 		}
 
 		for (auto& bullet : enemyBullets)
