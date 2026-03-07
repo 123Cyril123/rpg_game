@@ -34,8 +34,8 @@ void SpawnItems(vector<Item>& items, int count)
 	for (int i = 0; i < count; i++)
 	{
 		Item newItem;
-		float randomX = (rand() % 1780) + 100;
-		float randomY = (rand() % 850) + 100;
+		float randomX = (rand() % (1600 - 250 + 1) + 250);
+		float randomY = (rand() % (800 - 200 + 1) + 200);
 
 		newItem.Initialize(Vector2f(randomX, randomY));
 		items.push_back(newItem);
@@ -94,8 +94,7 @@ int main()
 	player.Load();
 	framerate.Load();
 
-	int currentLevel = 1;
-	int score = 0;
+	
 	int health = 3;
 	Texture heartTexture;
 	if (!heartTexture.loadFromFile("Project1/assets/texture/heart2.png"))
@@ -121,6 +120,9 @@ int main()
 	bool isTimeSlowed = false;
 	float slowTimeTimer = 0.0f;
 	float slowDuration = 3000.0f;
+
+	int currentLevel = 1;
+	int score = 0;
 
 	vector<RectangleShape> magnets;
 	float magnetSpawnTimer = 0.0f;
@@ -260,11 +262,23 @@ int main()
 			if (itemsCollected >= itemsNeeded)
 			{
 				currentLevel++;
-				currentSpawnRate -= 30;
-				enemyBulletSpeed += 0.075f;
+				if (currentLevel <= 5)
+				{
+					currentSpawnRate -= 15;
+					enemyBulletSpeed += 0.030f;
+				}
+				else if (currentLevel > 5 && currentLevel <= 15)
+				{
+					currentSpawnRate -= 30;
+					enemyBulletSpeed += 0.075f;
+				}
+				
 				itemsCollected = 0;
 				music.setPitch(1.0f + (currentLevel * 0.02f));
-				itemsNeeded++;
+				if (currentLevel <= 7)
+				{
+					itemsNeeded++;
+				}
 				enemyBullets.clear();
 
 				SpawnItems(activeItems, itemsNeeded);
