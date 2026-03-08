@@ -113,7 +113,12 @@ int main()
 
 		hpHearts.push_back(heartSprite);
 	}
-
+	
+	Texture powerUpTexture;
+	if (!powerUpTexture.loadFromFile("Project1/assets/texture/items/item540.png"))
+	{
+		cout << "Chyba: Nepodarilo se nacist item540.png" << endl;
+	}
 	vector<RectangleShape> powerUps;
 	float powerUpSpawnTimer = 0.0f;
 	float powerUpSpawnRate = 15000.0f;
@@ -124,6 +129,28 @@ int main()
 	int currentLevel = 1;
 	int score = 0;
 
+	Texture shieldTexture;
+	if (!shieldTexture.loadFromFile("Project1/assets/texture/shields/Pack 2/1px/20.png"))
+	{
+		cout << "Chyba: Nepodarilo se nacist 20.png" << endl;
+	}
+	vector<RectangleShape> shields;
+	float shieldSpawnTimer = 0.0f;
+	float shieldSpawnRate = 20000.0f;
+	bool isShieldInUse = false;
+	CircleShape playerShieldAura;
+	playerShieldAura.setRadius(30.0f); 
+	playerShieldAura.setFillColor(Color(0, 150, 255, 100));
+	playerShieldAura.setOutlineColor(Color(0, 200, 255, 200)); 
+	playerShieldAura.setOutlineThickness(3.0f);
+	playerShieldAura.setOrigin({ 30.0f, 30.0f });
+
+	
+	Texture magnetTexture;
+	if (!magnetTexture.loadFromFile("Project1/assets/texture/items/item555.png"))
+	{
+		cout << "Chyba: Nepodarilo se nacist item555.png" << endl;
+	}
 	vector<RectangleShape> magnets;
 	float magnetSpawnTimer = 0.0f;
 	float magnetSpawnRate = 30000.0f;
@@ -224,7 +251,7 @@ int main()
 			skeleton.Update();
 			player.Update(deltaTime, skeleton, mousePosition);
 
-			enemySpawnTimer += deltaTime;
+			
 			if (isMusicWaiting)
 			{
 				musicDelayTimer += deltaTime;
@@ -234,12 +261,12 @@ int main()
 					isMusicWaiting = false;
 				}
 			}
+			enemySpawnTimer += deltaTime;
 			if (enemySpawnTimer >= currentSpawnRate)
 			{
 				SpawnBullets(enemyBullets, player.sprite.getPosition(), enemyBulletSpeed);
 				enemySpawnTimer = 0;
 			}
-
 
 
 			for (auto& item : activeItems)
@@ -272,7 +299,7 @@ int main()
 					currentSpawnRate -= 30;
 					enemyBulletSpeed += 0.075f;
 				}
-				
+				isMagnetInUse = false;
 				itemsCollected = 0;
 				music.setPitch(1.0f + (currentLevel * 0.02f));
 				if (currentLevel <= 7)
@@ -290,15 +317,47 @@ int main()
 			{
 				powerUpSpawnTimer = 0.0f;
 				RectangleShape bonus;
-				bonus.setSize({ 25.0f,25.0f });
-				bonus.setFillColor(Color(0, 255, 255));
-				bonus.setOutlineColor(Color::White);
+				bonus.setSize({ 30.0f,30.0f });
+				bonus.setTexture(&powerUpTexture);
+				bonus.setOutlineColor(Color::Transparent);
 				bonus.setOutlineThickness(2.0f);
 				bonus.setPosition({ (float)(rand() % 1800 + 100), (float)(rand() % 900 + 100) });
 
 				powerUps.push_back(bonus);
 
 			}
+
+			if (currentLevel >= 4)
+			{
+				shieldSpawnTimer += deltaTime;
+				if (shieldSpawnTimer >= shieldSpawnRate && !isShieldInUse)
+				{
+					shieldSpawnTimer = 0.0f;
+					RectangleShape shieldItem;
+					shieldItem.setSize({ 25.0f,25.0f });
+					shieldItem.setTexture(&shieldTexture);
+					shieldItem.setPosition({ (float)(rand() % 1800 + 200), (float)(rand() % 900 + 200) });
+					shields.push_back(shieldItem);
+				}
+			}
+			for (int i = 0; i < shields.size(); i++)
+			{
+				if (Math::checkRectCollision(player.GetHitBoxBoundsBoundingRectangle2(), shields[i].getGlobalBounds()))
+				{
+					shields.erase(shields.begin() + i);
+					isShieldInUse = true;
+					break;
+				}
+			}
+
+			if (isShieldInUse)
+			{
+				Vector2f playerCenter = player.sprite.getPosition() + Vector2f(32.0f, 32.0f);
+				playerShieldAura.setPosition(playerCenter);
+			}
+				
+
+			
 
 			if (currentLevel >= 3)
 			{
@@ -307,9 +366,9 @@ int main()
 				{
 					magnetSpawnTimer = 0.0f;
 					RectangleShape magnet;
-					magnet.setSize({ 25.0f,25.0f });
-					magnet.setFillColor(Color::Red);
-					magnet.setOutlineColor(Color::White);
+					magnet.setSize({ 30.0f,30.0f });
+					magnet.setTexture(&magnetTexture);
+					magnet.setOutlineColor(Color::Transparent);
 					magnet.setOutlineThickness(2.0f);
 					magnet.setPosition({ (float)(rand() % 1800 + 100), (float)(rand() % 900 + 100) });
 
@@ -378,9 +437,16 @@ int main()
 				enemyBullets[i].Update(bulletDeltaTime);
 
 				if (Math::checkRectCollision(player.GetHitboxBounds(), enemyBullets[i].GetGlobalBounds()))
-				{
-					health--;
-					player.isHit = true;
+				{	
+					if (!isShieldInUse)
+					{
+						health--;
+						player.isHit = true;
+					}
+					else {
+						isShieldInUse = false;
+					}
+					
 
 					if (health <= 0)
 					{
@@ -446,6 +512,10 @@ int main()
 				magnetDurationTimer = 0.0f;
 				player.boundingRectangle2.setSize({ 50.f, 50.f });
 
+				shields.clear();
+				shieldSpawnTimer = 0.0f;
+				isShieldInUse = false;
+
 				enemyBullets.clear();
 				SpawnItems(activeItems, itemsNeeded);
 				player.sprite.setPosition({ 990.0f, 525.0f });
@@ -479,11 +549,22 @@ int main()
 			window.draw(mag);
 		}
 
+		for (auto& shield : shields)
+		{
+			window.draw(shield);
+		}
+
 		for (auto& bullet : enemyBullets)
 		{
 			bullet.Draw(window);
 		}
 		player.Draw(window);
+
+		if (isShieldInUse)
+		{
+			window.draw(playerShieldAura);
+		}
+
 		framerate.Draw(window);
 		window.draw(uiText);
 

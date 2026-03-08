@@ -1,12 +1,16 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <iostream>
 using namespace sf;
+using namespace std;
 
 class Bullet
 {
 private:
 	RectangleShape rectangleshape;
+	static Texture texture;
+	static bool textureLoaded;
 	
 public:
 	float speed;
